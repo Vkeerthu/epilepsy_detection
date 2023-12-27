@@ -1,288 +1,293 @@
-Certainly! Here is the content of the document including both code and output:
+Certainly! Here is the source code extracted from the provided document:
 
-```plaintext
-Filename: sss.py 
-Part 1 of 1:
-
+```python
 #!/usr/bin/env python
 # coding: utf-8
 
-# # import packages
+# # Package Installation
 
-# In[33]:
-
-
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split, cross_val_score, GridSearchCV
-from sklearn.preprocessing import StandardScaler
-from sklearn.svm import SVC
-from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+# In[1]:
 
 
-# In[5]:
-
-
+get_ipython().system('pip3 install matplotlib')
 get_ipython().system('pip3 install numpy')
 get_ipython().system('pip3 install pandas')
-get_ipython().system('pip3 install torch')
-get_ipython().system('pip3 install -Uqq fastbook')
-get_ipython().system('pip3 install --user graphviz')
-print("Done")
+get_ipython().system('pip3 install keras==2.3.1')
+get_ipython().system('pip3 install tensorflow==2.1.0')
+get_ipython().system('pip3 install scikit-learn==0.24.0')
 
 
-# In[6]:
+# # Import the Packages
+
+# In[ ]:
 
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import torch
-from fastai.tabular.all import *
+from keras import backend as K
+from keras.layers import Dense, Activation, LSTM, Dropout
+from keras.models import Sequential, load_model
+from keras.utils import to_categorical  # Updated import statement
+from keras.utils.generic_utils import get_custom_objects
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
 
 
-# # data preparation
+# # Import the Dataset
 
-# In[7]:
+# In[1]:
 
 
 raw_data = pd.read_csv(r'C:\Users\nielit\Downloads\data.csv')
 
 
-# In[8]:
-
-
-raw_data.head()
-
-
-# # Split the Dataset into Training Set & Test Set
+# # Split Dataset into Training Set and Test Set
 
 # In[9]:
 
 
-# Percentage to split by for training
 perc = 90
-
 # Set for training the model
-data = raw_data.head(int(len(raw_data)*(perc/100))).copy()
-
+data = raw_data.head(int(len(raw_data) * (perc / 100)))
 # Set for testing the model later to get the real accuracy
-test_set = raw_data.tail(int(len(raw_data)*((100-perc)/100))).copy()
+test_set = raw_data.tail(int(len(raw_data) * ((100 - perc) / 100)))
 
-
-# In[10]:
-
-
-data
-
-
-# # Format Data for Training
 
 # In[11]:
 
 
-cont_names_data = list(data.columns.values)
-cont_names_data.remove("Unnamed: 0")
-cont_names_data.remove('y')
+from sklearn.model_selection import train_test_split
 
 
 # In[12]:
 
 
-cat_names_data = []
-for i in data["Unnamed: 0"]:
-    cat_names_data.append(i)
-
-
-# In[13]:
-
-
-data['y'].replace(2, 0, inplace=True)
-data['y'].replace(3, 0, inplace=True)
-data['y'].replace(4, 0, inplace=True)
-data['y'].replace(5, 0, inplace=True)
+from sklearn.model_selection import train_test_split
 
 
 # In[14]:
 
 
-data
+get_ipython().system('pip3 install matplotlib')
+get_ipython().system('pip3 install numpy')
+get_ipython().system('pip3 install pandas')
+get_ipython().system('pip3 install keras==2.3.1')
+get_ipython().system('pip3 install tensorflow==2.1.0')
+get_ipython().system('pip3 install scikit-learn==0.24.0')
 
 
-# # Making and Training the Tabular Model
-
-# In[15]:
+# In[ ]:
 
 
-splits = RandomSplitter(valid_pct=0.3, seed=None)(range_of(data))
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from keras import backend as K
+from keras.layers import Dense, Activation, LSTM, Dropout, Conv1D, MaxPooling1D, Flatten
+from keras.models import Sequential, load_model
+from keras.utils import to_categorical  # Corrected import
+from keras.utils.generic_utils import get_custom_objects
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
 
-to = TabularPandas(
-    data,
-    cont_names = cont_names_data,
-    procs = [Normalize, FillMissing, Categorify],
-    splits = splits,
-    y_block = CategoryBlock,
-    y_names= "y"
-)
 
-dls = to.dataloaders(bs=256)
-dls.show_batch()
+# In[16]:
 
+
+raw_data = pd.read_csv(r'C:\Users\nielit\Downloads\data.csv')
+
+
+# In[17]:
+
+
+raw_data.head()
+
+
+# In[18]:
+
+
+# Percentage to split by for training
+perc = 90
+# Set for training the model
+data = raw_data.head(int(len(raw_data) * (perc / 100)))
+# Set for testing the model later to get the real accuracy
+test_set = raw_data.tail(int(len(raw_data) * ((100 - perc) / 100)))
+
+
+# # Format the Data
+
+# In[19]:
+
+
+x_values = data.values[:, 1:-1]
+y_values = np.array(data['y'])
+y_values = to_categorical(y_values)  
+x_train, x_test, y_train, y_test = train_test_split(x_values, y_values, test_size=0.2, random_state=1)
+x_train = x_train.reshape(-1, 178, 1)
+x_test = x_test.reshape(-1, 178, 1)
+print(
+    "X Train: {}\nX Test: {}\nY Train: {}\nY Test {}".format(x_train.shape, x_test.shape, y_train.shape, y_test.shape))
+
+
+# # Visualize the Dataset
 
 # In[20]:
 
 
-import warnings
-
-warnings.filterwarnings("ignore", category=UserWarning, module="fastai.torch_core")
-
-
-# # Training
-
-# ## Find the best learning rate
-
-# In[21]:
-
-
-f1score = F1Score()
-
-# Assuming you have already defined dls and cont_names_data
-learn = tabular_learner(dls, metrics=[f1score, accuracy, error_rate])
-lr_min = learn.lr_find()
-print(lr_min)
+plt.figure(figsize=(12, 8))
+# Plot data labeled 1 - Seizure
+plt.plot(x_values[1, :], label="1 - Seizure")
+# Plot data labeled 2 - No Seizure
+plt.plot(x_values[7, :], label="2 - No Seizure")
+# Plot data labeled 3 - No Seizure
+plt.plot(x_values[12, :], label="3 - No Seizure")
+# Plot data labeled 4 - No Seizure
+plt.plot(x_values[0, :], label="4 - No Seizure")
+# Plot data labeled 5 - No Seizure
+plt.plot(x_values[2, :], label="5 - No Seizure")
+# Create a legend and output the graph
+plt.legend()
+plt.show()
 
 
-# In[22]:
+# In[ ]:
 
 
-f1score = F1Score()
-
-# learn = tabular_learner(dls, metrics=[accuracy, error_rate, f1score])
-learn = tabular_learner(dls, metrics=[f1score, accuracy, error_rate])
-lr_min, lr_steep = learn.lr_find()
-print(lr_min)
-print(lr_steep)
+from keras.utils import get_custom_objects
 
 
-# # Train the Model
+# # Model Training - Create a Custom Activation Function
 
-# In[23]:
-
-
-learn.fit(n_epoch=100, lr=lr_min)
+# In[ ]:
 
 
-# # Save the Model
-
-# In[24]:
-
-
-name = "EEG_torch"
-# save_format = int(input("Which format to save the model:\n\t1. .pt - PyTorch\n\t2. pkl - FastAi\n1 or 2:"))
-save_format = 1
-# Try both of them and let me know which one works
-if save_format == 1:
-    torch.save(learn, name + ".pt")
-    print("Saved the model using torch")
-elif save_format == 2:
-    learn.export(name + ".pkl")
-    print("Saved the model using FastAi")
-else:
-    print("Did not work")
+def custom_activation(x, beta=2):
+    """
+    Define Swish Activation Function
+    """
+    return K.sigmoid(beta * x) * x
 
 
-# # Test the Model with Test Set
-
-# In[25]:
+get_custom_objects().update({'custom_activation': Activation(custom_activation)})
 
 
-if save_format == 1:
-    model = torch.load(name + ".pt")
-    print("Loaded the .pt model using torch")
-elif save_format == 2:
-    model = torch.load(name + ".pkl")
-    print("Loaded the .pkl model using torch")
-else:
-    print("Did not work")
-
+# # Create a LSTM Model
 
 # In[26]:
 
 
-def get_row(row_number):
-    # print(test_set.iloc[row_number].iloc[1:])
-    row = test_set.iloc[row_number].iloc[1:-1]
-    return row
+model = Sequential()
+model.add(LSTM(56, input_shape=(45, 1), return_sequences=True))
+model.add(Dropout(0.3))
+model.add(LSTM(56))
+model.add(Dropout(0.3))
+model.add(Dense(20))
 
 
 # In[27]:
 
 
-row_num = 232
-row, clas, probs = model.predict(get_row(row_num))
+model.add(Activation('tanh'))
+model.add(Dense(5))
+model.add(Activation('softmax'))
 
+
+# # Output the model summary
 
 # In[28]:
 
 
-row.show()
+model.summary()
 
 
-# In[34]:
-
-
-print(clas.int())
-
-#result = torch.round(torch.abs(clas))
-
-if clas.int() == 1:
-    print("Seizure Detected")
-else:
-    print("No Seizure Detected")
-
+# # Define the variables for training
 
 # In[29]:
 
 
-test_set
-
-
-# In[30]:
-
-
-test_set['y'].replace(1, 1, inplace=True)
-test_set['y'].replace(2, 0, inplace=True)
-test_set['y'].replace(3, 0, inplace=True)
-test_set['y'].replace(4, 0, inplace=True)
-test_set['y'].replace(5, 0, inplace=True)
+model.compile(
+    loss="binary_crossentropy",
+    optimizer="adam",
+    metrics=["accuracy"]
+)
 
 
 # In[31]:
 
 
-test_set
+import tensorflow as tf
+from keras.models import Sequential, load_model
+from keras.utils import to_categorical
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
 
 
 # In[32]:
 
 
-correct = 0
-wrong = 0
+x_train_tensor = tf.convert_t o_tensor((x_train[:, ::4] - x_train.mean()) / x_train.std(), dtype=tf.float32)
+y_train_tensor = tf.convert_to_tensor(y_train[:, 1:], dtype=tf.float32)
 
-for i in range(10350, 11500):
-    row, clas, probs = model.predict(get_row(i-10350))
-    if clas.int() == test_set['y'][i]:
-        correct += 1
-    else:
-        print(i)
-        print(str(clas.int()) + ", " + str(test_set['y'][i]))
-        wrong += 1
-print("Correct: ", correct)
-print("Wrong: ", wrong)
-print("Percent: " + str(correct / (correct + wrong)))
+x_test_tensor = tf.convert_to_tensor((x_test[:, ::4] - x_test.mean()) / x_test.std(), dtype=tf.float32)
+y_test_tensor = tf.convert_to_tensor(y_test[:, 1:], dtype=tf.float32)
 
 
-# In[ ]:
-```
+# # Train the LSTM Model
 
-Let me know if you have any more questions or if there's anything specific you would like assistance with!
+# In[33]:
+
+
+hist = model.fit(
+    x=x_train_tensor,
+    y=y_train_tensor,
+    validation_data=(x_test_tensor, y_test_tensor),
+    epochs=100,
+    batch_size=15,
+    shuffle=True
+)
+
+
+# # Save the Model
+
+# In[34]:
+
+
+model_name = "Seizure_Detector.h5"
+model.save(model_name)
+
+
+# # Visualize Model's Accuracy Metrics
+
+# In[35]:
+
+
+plt.figure(0)
+plt.plot(hist.history['loss'], 'green')
+plt.plot(hist.history['accuracy'], 'red')
+plt.show()
+
+
+# # Plot Validation Loss and Accuracy of the Model
+
+# In[36]:
+
+
+plt.figure(0)
+plt.plot(hist.history['val_loss'], 'blue')
+plt.plot(hist.history['val_accuracy'], 'black')
+plt.show()
+
+
+# In[37]:
+
+
+model = load_model(model_name)
+
+
+# # Split the Test Set
+
+# In[38]:
+
+
+x_test
