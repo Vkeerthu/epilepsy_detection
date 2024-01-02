@@ -1,4 +1,4 @@
-# Epilepsy seizure detection
+# Epilepsy seizure detection using ML
 
 ## Overview
 
