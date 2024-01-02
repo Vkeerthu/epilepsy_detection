@@ -1,4 +1,4 @@
-# Epilepsy Detection using LSTM
+# Epilepsy seizure detection
 
 ## Overview
 
