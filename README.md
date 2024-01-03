@@ -27,7 +27,7 @@ This project makes use of the following tools and technologies:
 
 - **Jupyter Notebooks**: Used for exploratory data analysis and model prototyping.
 
-- ** Virtualenv or Conda**: Tools for creating isolated Python environments to manage dependencies.
+- ** [Optional]Virtualenv or Conda**: Tools for creating isolated Python environments to manage dependencies.
 
 Please ensure you have these tools installed and configured before running the project.
 
