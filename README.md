@@ -2,6 +2,6 @@
 
 ## Overview
 
-This repository contains Python code for detecting epilepsy using Long Short-Term Memory (LSTM) networks. The code leverages deep learning techniques to automatically detect epileptic seizures from EEG (Electroencephalogram) signals.
+This project employs LSTM (Long Short-Term Memory) and BiLSTM (Bidirectional LSTM) models for detecting epileptic seizures in EEG (Electroencephalogram) signals. The models are trained on labeled EEG data to classify segments as either seizure or non-seizure.
 
 
