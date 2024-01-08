@@ -26,12 +26,7 @@ The model is trained on the [Epileptic Seizure Recognition Data Set](https://arc
 - Keras
 - Other dependencies (specified in requirements.txt)
 
-## Setup
 
-
-
-    
-4. Run the Jupyter Notebook or Python scripts to train and evaluate the models.
 
 ## Usage
 
