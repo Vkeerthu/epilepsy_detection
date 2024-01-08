@@ -30,9 +30,7 @@ The model is trained on the [Epileptic Seizure Recognition Data Set](https://arc
 
 
 
-    pip install -r requirements.txt
-    ```
-
+    
 4. Run the Jupyter Notebook or Python scripts to train and evaluate the models.
 
 ## Usage
